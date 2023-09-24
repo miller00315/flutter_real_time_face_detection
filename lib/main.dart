@@ -51,7 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
   //TODO code to initialize the camera feed
   initializeCamera() async {
     //TODO initialize detector
-    final options = FaceDetectorOptions(enableContours: true,enableLandmarks: true);
+    final options =
+        FaceDetectorOptions(enableContours: true, enableLandmarks: true);
     faceDetector = FaceDetector(options: options);
 
     controller = CameraController(description, ResolutionPreset.high);
@@ -73,18 +74,16 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  //TODO face detection on a frame
   dynamic _scanResults;
   CameraImage? img;
   doFaceDetectionOnFrame() async {
-    //var frameImg = getInputImage();
-    // List<Face> faces = await faceDetector.processImage(frameImg);
-    // print("faces present = ${faces.length}");
+    final frameImg = getInputImage();
+    List<Face> faces = await faceDetector.processImage(frameImg);
+
     setState(() {
-      //_scanResults = faces;
+      _scanResults = faces;
       isBusy = false;
     });
-
   }
 
   InputImage getInputImage() {
@@ -97,31 +96,19 @@ class _MyHomePageState extends State<MyHomePage> {
     final camera = description;
     final imageRotation =
         InputImageRotationValue.fromRawValue(camera.sensorOrientation);
-    // if (imageRotation == null) return;
 
     final inputImageFormat =
         InputImageFormatValue.fromRawValue(img!.format.raw);
-    // if (inputImageFormat == null) return null;
 
-    final planeData = img!.planes.map(
-      (Plane plane) {
-        return InputImagePlaneMetadata(
-          bytesPerRow: plane.bytesPerRow,
-          height: plane.height,
-          width: plane.width,
-        );
-      },
-    ).toList();
-
-    final inputImageData = InputImageData(
+    final inputImageData = InputImageMetadata(
       size: imageSize,
-      imageRotation: imageRotation!,
-      inputImageFormat: inputImageFormat!,
-      planeData: planeData,
+      rotation: imageRotation!,
+      format: inputImageFormat!,
+      bytesPerRow: img!.width,
     );
 
     final inputImage =
-        InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
+        InputImage.fromBytes(bytes: bytes, metadata: inputImageData);
 
     return inputImage;
   }
@@ -186,14 +173,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
 
-      // stackChildren.add(
-      //   Positioned(
-      //       top: 0.0,
-      //       left: 0.0,
-      //       width: size.width,
-      //       height: size.height - 250,
-      //       child: buildResult()),
-      // );
+      stackChildren.add(
+        Positioned(
+          top: 0.0,
+          left: 0.0,
+          width: size.width,
+          height: size.height - 250,
+          child: buildResult(),
+        ),
+      );
     }
 
     stackChildren.add(Positioned(
@@ -282,29 +270,29 @@ class FaceDetectorPainter extends CustomPainter {
       );
     }
 
-    // Paint p2 = Paint();
-    // p2.color = Colors.green;
-    // p2.style = PaintingStyle.stroke;
-    // p2.strokeWidth = 5;
-    //
-    // for (Face face in faces) {
-    //   Map<FaceContourType, FaceContour?> con = face.contours;
-    //   List<Offset> offsetPoints = <Offset>[];
-    //   con.forEach((key, value) {
-    //     if(value != null) {
-    //       List<Point<int>>? points = value.points;
-    //       for (Point p in points) {
-    //         Offset offset = Offset(camDire2 == CameraLensDirection.front
-    //             ? (absoluteImageSize.width - p.x.toDouble()) * scaleX
-    //             : p.x.toDouble() * scaleX
-    //             , p.y.toDouble()*scaleY);
-    //         offsetPoints.add(offset);
-    //       }
-    //       canvas.drawPoints(PointMode.points, offsetPoints, p2);
-    //     }
-    //   });
-    //
-    // }
+    Paint p2 = Paint();
+    p2.color = Colors.green;
+    p2.style = PaintingStyle.stroke;
+    p2.strokeWidth = 5;
+
+    for (Face face in faces) {
+      Map<FaceContourType, FaceContour?> con = face.contours;
+      List<Offset> offsetPoints = <Offset>[];
+      con.forEach((key, value) {
+        if (value != null) {
+          List<Point<int>>? points = value.points;
+          for (Point p in points) {
+            Offset offset = Offset(
+                camDire2 == CameraLensDirection.front
+                    ? (absoluteImageSize.width - p.x.toDouble()) * scaleX
+                    : p.x.toDouble() * scaleX,
+                p.y.toDouble() * scaleY);
+            offsetPoints.add(offset);
+          }
+          canvas.drawPoints(PointMode.points, offsetPoints, p2);
+        }
+      });
+    }
   }
 
   @override
