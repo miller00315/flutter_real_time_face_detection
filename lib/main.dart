@@ -142,8 +142,11 @@ class _MyHomePageState extends State<MyHomePage> {
       description = cameras[0];
     }
     await controller.stopImageStream();
-    // await controller.dispose();
-    // controller = null;
+    
+    await controller.dispose();
+
+    controller = null;
+
     setState(() {
       controller;
     });
